@@ -312,6 +312,18 @@ public class WebCrawler implements Runnable {
     // Do nothing by default
     // Sub-classed should override this to add their custom functionality
   }
+  
+  /**
+   * Classes that extend WebCrawler may overwrite this function to permit
+   * an extended Page implementation.
+   * 
+   * @param newURL
+   *              the new URL that is to be represented by the page.
+   * @return the Page implementation for the specified URL
+   */
+  protected void newPage(WebURL newURL) {
+    return new Page(newURL);
+  }
 
   private void processPage(WebURL curURL) {
     PageFetchResult fetchResult = null;
@@ -325,7 +337,7 @@ public class WebCrawler implements Runnable {
       handlePageStatusCode(curURL, statusCode, EnglishReasonPhraseCatalog.INSTANCE
           .getReason(statusCode, Locale.ENGLISH)); // Finds the status reason for all known statuses
 
-      Page page = new Page(curURL);
+      Page page = newPage(curURL);
       page.setFetchResponseHeaders(fetchResult.getResponseHeaders());
       page.setStatusCode(statusCode);
       if (statusCode < 200 || statusCode > 299) { // Not 2XX: 2XX status codes indicate success
