@@ -321,7 +321,7 @@ public class WebCrawler implements Runnable {
    *              the new URL that is to be represented by the page.
    * @return the Page implementation for the specified URL
    */
-  protected void newPage(WebURL newURL) {
+  protected Page newPage(WebURL newURL) {
     return new Page(newURL);
   }
 
