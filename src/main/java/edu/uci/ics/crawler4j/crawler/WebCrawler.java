@@ -92,6 +92,8 @@ public class WebCrawler implements Runnable {
    * The Frontier object that manages the crawl queue.
    */
   private Frontier frontier;
+  
+  private int batchSize;
 
   /**
    * Is the current crawler instance waiting for new URLs? This field is
@@ -117,6 +119,7 @@ public class WebCrawler implements Runnable {
     this.frontier = crawlController.getFrontier();
     this.parser = new Parser(crawlController.getConfig());
     this.myController = crawlController;
+    this.batchSize = crawlController.getConfig().getBatchSize();
     this.isWaitingForNewURLs = false;
   }
 
@@ -254,9 +257,9 @@ public class WebCrawler implements Runnable {
   public void run() {
     onStart();
     while (true) {
-      List<WebURL> assignedURLs = new ArrayList<>(50);
+      List<WebURL> assignedURLs = new ArrayList<>(batchSize);
       isWaitingForNewURLs = true;
-      frontier.getNextURLs(50, assignedURLs);
+      frontier.getNextURLs(batchSize, assignedURLs);
       isWaitingForNewURLs = false;
       if (assignedURLs.isEmpty()) {
         if (frontier.isFinished()) {

@@ -28,7 +28,7 @@ import org.apache.http.message.BasicHeader;
 import edu.uci.ics.crawler4j.crawler.authentication.AuthInfo;
 
 public class CrawlConfig {
-
+	
   /**
    * The folder which will be used by crawler for storing the intermediate
    * crawl data. The content of this folder should not be modified manually.
@@ -164,6 +164,9 @@ public class CrawlConfig {
    */
   private List<AuthInfo> authInfos;
 
+  /** How many request a crawler should obtain from the frontier at once */
+  private int batchSize = 50;
+  
   /**
    * Validates the configs specified by this instance.
    *
@@ -495,7 +498,15 @@ public class CrawlConfig {
     this.authInfos = authInfos;
   }
 
-  @Override
+  public int getBatchSize() {
+	return batchSize;
+}
+
+public void setBatchSize(int batchSize) {
+	this.batchSize = batchSize;
+}
+
+@Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("Crawl storage folder: " + getCrawlStorageFolder() + "\n");
@@ -516,6 +527,7 @@ public class CrawlConfig {
     sb.append("Proxy port: " + getProxyPort() + "\n");
     sb.append("Proxy username: " + getProxyUsername() + "\n");
     sb.append("Proxy password: " + getProxyPassword() + "\n");
+    sb.append("Batch size: " + getBatchSize() + "\n");
     return sb.toString();
   }
 }
