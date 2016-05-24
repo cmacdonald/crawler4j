@@ -20,6 +20,7 @@ package edu.uci.ics.crawler4j.frontier;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.sleepycat.je.Cursor;
 import com.sleepycat.je.Database;
 import com.sleepycat.je.DatabaseConfig;
@@ -120,10 +121,21 @@ public class WorkQueues {
    * If depth is also equal, those found earlier (therefore, smaller docid) will
    * be crawled earlier.
    */
-  protected static DatabaseEntry getDatabaseEntryKey(WebURL url) {
+  @VisibleForTesting
+  public static DatabaseEntry getDatabaseEntryKey(WebURL url) {
     byte[] keyData = new byte[6];
-    keyData[0] = url.getPriority();
-    keyData[1] = ((url.getDepth() > Byte.MAX_VALUE) ? Byte.MAX_VALUE : (byte) url.getDepth());
+    // Because the ordering is done strictly binary, negative values will come last, because
+    // their binary representation starts with the MSB at 1. In order to fix this, we'll have
+    // to add the minimum value to become 0. This means that the maximum number will become
+    // out of range in Byte-value, but the integer value is nicely converted down to the actual
+    // binary representation that is useful here.
+    byte binary_priority = (byte)(url.getPriority() - Byte.MIN_VALUE);
+    //assert binary_priority >= 0 : "priority " + url.getPriority() + " maps to " + binary_priority;
+    keyData[0] = binary_priority;
+    
+    //check that same bug does not affect depth
+    assert url.getDepth() >= 0;
+    keyData[1] = (url.getDepth() > Byte.MAX_VALUE ? Byte.MAX_VALUE : (byte) url.getDepth());
     Util.putIntInByteArray(url.getDocid(), keyData, 2);
     return new DatabaseEntry(keyData);
   }
